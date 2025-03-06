@@ -14,9 +14,9 @@ import (
 	"os/signal"
 	"math/rand"
 	"sipware/api"
-	"sipware/src/trans"
-	"sipware/src/message"
-	"sipware/app/queues"
+	"sipware/trans"
+	"sipware/message"
+	"sipware/queues"
 )
 
 type User struct {

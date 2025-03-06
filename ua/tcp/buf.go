@@ -8,7 +8,7 @@ import (
 	"strings"
 	"net/mail"
 	"unicode/utf8"
-	"sipware/src/message"
+	"sipware/message"
 )
 
 type SipwareTcpBuf struct {
