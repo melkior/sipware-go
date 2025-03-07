@@ -2,7 +2,7 @@ package api
 
 import (
 	"os"
-	"sipware/message"
+	"github.com/melkior/sipware-go/message"
 )
 
 type Ua interface {

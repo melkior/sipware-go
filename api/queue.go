@@ -1,7 +1,7 @@
 package api
 
 import (
-	"sipware/message"
+	"github.com/melkior/sipware-go/message"
 )
 
 type Queue interface {
