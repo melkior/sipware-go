@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"fmt"
 	"sync"
 	"github.com/melkior/sipware-go/api"
 	"github.com/melkior/sipware-go/message"
