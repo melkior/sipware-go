@@ -2,7 +2,7 @@ package trans
 
 import (
 	"sync"
-	"sipware/message"
+	"github.com/melkior/sipware-go/message"
 )
 
 type SipwareTr struct {

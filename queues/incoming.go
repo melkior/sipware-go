@@ -3,8 +3,8 @@ package queue
 import (
 	"fmt"
 	"sync"
-	"sipware/api"
-	"sipware/message"
+	"github.com/melkior/sipware-go/api"
+	"github.com/melkior/sipware-go/message"
 )
 
 type Incoming struct {
