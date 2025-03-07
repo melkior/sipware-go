@@ -13,10 +13,10 @@ import (
 	"context"
 	"os/signal"
 	"math/rand"
-	"sipware/api"
-	"sipware/trans"
-	"sipware/message"
-	"sipware/queues"
+	"github.com/melkior/sipware-go/api"
+	"github.com/melkior/sipware-go/trans"
+	"github.com/melkior/sipware-go/message"
+	"github.com/melkior/sipware-go/queues"
 )
 
 type User struct {
