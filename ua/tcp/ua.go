@@ -50,7 +50,7 @@ type Config struct {
 }
 
 type SipwareTcpUa struct {
-	sipware.Ua
+	api.Ua
 	ctx context.Context
 	name string
 	host string
@@ -63,7 +63,7 @@ type SipwareTcpUa struct {
 	tr map[string] trans.SipwareTr
 	inCh chan message.Msg
 	outCh chan message.Msg
-	Queues map[string]sipware.Queue
+	Queues map[string]api.Queue
 }
 
 func New(name string) *SipwareTcpUa {
@@ -72,7 +72,7 @@ func New(name string) *SipwareTcpUa {
 	fmt.Println("Seed", seed)
 
 	tr := make(map[string](trans.SipwareTr))
-	queues := make(map[string](sipware.Queue))
+	queues := make(map[string](api.Queue))
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -196,9 +196,9 @@ func (ua *SipwareTcpUa) Start() {
 	ua.inCh = make(chan message.Msg)
 	ua.outCh = make(chan message.Msg)
 
-	ua.Queues["incoming"] = &SipwareQueue.Incoming{}
-	ua.Queues["outgoing"] = &SipwareQueue.Outgoing{}
-	ua.Queues["active"] = &SipwareQueue.Active{}
+	ua.Queues["incoming"] = &queue.Incoming{}
+	ua.Queues["outgoing"] = &queue.Outgoing{}
+	ua.Queues["active"] = &queue.Active{}
 
 	go ua.startReading()
 	go ua.startDispatcher()

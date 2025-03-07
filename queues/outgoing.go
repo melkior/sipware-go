@@ -7,7 +7,7 @@ import (
 )
 
 type Outgoing struct {
-	sipware.Queue
+	api.Queue
 	lock sync.Mutex
 	items []message.Msg
 }

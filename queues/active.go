@@ -1,13 +1,14 @@
 package queue
 
 import (
+	"fmt"
 	"sync"
 	"github.com/melkior/sipware-go/api"
 	"github.com/melkior/sipware-go/message"
 )
 
 type Active struct {
-	sipware.Queue
+	api.Queue
 	lock sync.Mutex
 	items []message.Msg
 }
@@ -35,6 +36,7 @@ func (q *Active) Process(f func(msg message.Msg)) {
 		msg, tail := q.items[0], q.items[1:]
 		q.items = tail
 		q.lock.Unlock()
+		fmt.Println("Active process", msg)
 	}
 }
 
