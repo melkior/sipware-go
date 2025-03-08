@@ -11,12 +11,12 @@ type Ua interface {
 	Wait()
 	Open(string)
 	Exit() chan os.Signal
-	Connect(string)
 	Done()
 	Destroy(exiting bool)
 	Read([]byte) (n int, err error)
 	Write(message.Msg) (err error)
 	Request(message.Msg, func(message.Msg) error) error
 	Reply(message.Msg)
-	Register(interface{})
+	Register(interface{}, func(message.Msg))
+	Connect(string, func(message.Msg))
 }
