@@ -25,7 +25,7 @@ type SipwareTcpUa struct {
 	name string
 	host string
 	seed rand.Rand
-	user User
+	user api.User
 	conn net.Conn
 	exit chan os.Signal
 	wg sync.WaitGroup
@@ -293,7 +293,7 @@ func (ua *SipwareTcpUa) Reply(m message.Msg) {
 }
 
 func (ua *SipwareTcpUa) Register(cf interface{}) {
-	cfg := cf.(RegisterConfig)
+	cfg := cf.(api.RegisterConfig)
 	fmt.Println("Sipware Tcp Ua Register", cfg);
 
 	reqid := ua.randomString(16, "ascii");
