@@ -239,7 +239,6 @@ func (ua *SipwareTcpUa) Write(m message.Msg) error {
         }
 
         buf.WriteString("\r\n")
-        // fmt.Println("WRITE HDR BUF", body, "|", buf, "|")
 
         if len(body) > 0 {
                 buf.Write(body[:len(body)])
@@ -255,35 +254,36 @@ func (ua *SipwareTcpUa) Request(msg message.Msg, f func(message.Msg) error) erro
 
 	err := ua.Write(msg)
 
-	if err == nil {
-		reqid := msg.Get("Reqid")
-		ua.tr[reqid[0]] = trans.New()
-		ua.tr[reqid[0]].Add(1)
-
-		go func() {
-			i := 1
-			ctx, cancel := context.WithTimeout(ua.ctx, time.Second)
-
-			defer cancel()
-
-			for {
-				select {
-				case <-ctx.Done():
-					fmt.Println("REQUEST CTX DONE")
-					return;
-				case msg := <- ua.tr[reqid[0]].Read():
-					fmt.Println("Ua response transaction", i, msg.Id)
-					i++
-					ua.tr[reqid[0]].Done()
-					cancel()
-					f(msg)
-				}
-			}
-		} ()
-		ua.tr[reqid[0]].Wait()
+	if err != nil {
+		return err
 	}
 
-	return err
+	reqid := msg.Get("Reqid")
+	ua.tr[reqid[0]] = trans.New()
+	ua.tr[reqid[0]].Add(1)
+
+	go func() {
+		i := 1
+		ctx, cancel := context.WithTimeout(ua.ctx, time.Second)
+
+		defer cancel()
+
+		for {
+			select {
+			case <-ctx.Done():
+				fmt.Println("Request ctx done")
+				return;
+			case msg := <- ua.tr[reqid[0]].Read():
+				fmt.Println("Ua response transaction", i, msg.Id)
+				i++
+				ua.tr[reqid[0]].Done()
+				cancel()
+				f(msg)
+			}
+		}
+	} ()
+	ua.tr[reqid[0]].Wait()
+	return nil
 }
 
 func (ua *SipwareTcpUa) Reply(m message.Msg) {
@@ -292,7 +292,7 @@ func (ua *SipwareTcpUa) Reply(m message.Msg) {
 	fmt.Println("Sipware Tcp Ua Reply Write", err);
 }
 
-func (ua *SipwareTcpUa) Register(cf interface{}) {
+func (ua *SipwareTcpUa) Register(cf interface{}, f func(msg message.Msg)) {
 	cfg := cf.(api.RegisterConfig)
 	fmt.Println("Sipware Tcp Ua Register", cfg);
 
@@ -318,26 +318,86 @@ func (ua *SipwareTcpUa) Register(cf interface{}) {
 	wg.Add(1)
 
 	go func() {
-		defer wg.Done()
 		err := ua.Request(msg, func(resp message.Msg) error {
+			defer wg.Done()
 			fmt.Println("Ua register response", resp)
 
-			displayName := resp.Get("Display_name")
-			email := resp.Get("Email")
-			alias := resp.Get("Alias")
+			if resp.Code == 200 {
+				displayName := resp.Get("Display_name")
+				email := resp.Get("Email")
+				alias := resp.Get("Alias")
 
-			if len(displayName) != 0 {
-				ua.user.DisplayName = displayName[0]
-			}
+				if len(displayName) != 0 {
+					ua.user.DisplayName = displayName[0]
+				}
 
-			if len(email) != 0 {
-				ua.user.Email = email[0]
-			}
+				if len(email) != 0 {
+					ua.user.Email = email[0]
+				}
 
-			if len(alias) != 0 {
-				ua.user.Alias = alias[0]
+				if len(alias) != 0 {
+					ua.user.Alias = alias[0]
+				}
+				fmt.Println("Register user", ua.user)
 			}
-			fmt.Println("REGISTER USER", ua.user)
+			f(resp)
+			return nil
+		})
+
+		if err != nil {
+			log.Fatalf("failed to write mail to STDOUT: %s", err)
+		}
+	} ()
+
+	wg.Wait()
+}
+
+func (ua *SipwareTcpUa) Connect(contact string, f func(msg message.Msg)) {
+	fmt.Println("Sipware Tcp Ua Connect", contact);
+
+	reqid := ua.randomString(16, "ascii");
+
+	headers := map[string][]string {
+		"From": []string{contact},
+		"To": []string{contact},
+		"Method": []string{"connect"},
+		"Reqid": []string{reqid},
+		"Content-Length": []string{"0"},
+	}
+
+	msg, err := message.NewMsg(headers, "")
+
+	if err != nil {
+		return;
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		err := ua.Request(msg, func(resp message.Msg) error {
+			defer wg.Done()
+			fmt.Println("Ua register response", resp)
+
+			if resp.Code == 200 {
+				displayName := resp.Get("Display_name")
+				email := resp.Get("Email")
+				alias := resp.Get("Alias")
+
+				if len(displayName) != 0 {
+					ua.user.DisplayName = displayName[0]
+				}
+
+				if len(email) != 0 {
+					ua.user.Email = email[0]
+				}
+
+				if len(alias) != 0 {
+					ua.user.Alias = alias[0]
+				}
+				fmt.Println("Connect user", ua.user)
+			}
+			f(resp)
 			return nil
 		})
 
